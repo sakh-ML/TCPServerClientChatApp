@@ -7,7 +7,9 @@
 #include <netinet/in.h>
 #include <string.h>
 
+#define PORT 9090
 #define LISTEN_BACKLOG 50
+#define BUFFER_SIZE 1024
 
 void error(const char* msg){
 	perror(msg);
@@ -25,7 +27,7 @@ int main(){
 	struct sockaddr_in serverSocketAdress;
 	memset(&serverSocketAdress, 0, sizeof(serverSocketAdress));
 	serverSocketAdress.sin_family = AF_INET;
-	serverSocketAdress.sin_port = htons(12345);
+	serverSocketAdress.sin_port = htons(PORT);
 	serverSocketAdress.sin_addr.s_addr = INADDR_ANY;
 	
 
@@ -47,6 +49,18 @@ int main(){
 
 	if(clientSocket == -1){
 		error("Error accpeting the connection");
+	}
+
+	const char* message = "Heyy";
+
+	if(send(clientSocket, message, strlen(message), 0) == -1){
+		error("Error sending the data");
+	}
+
+	char buffer[BUFFER_SIZE] = {0};
+
+	if(recv(clientSocket, buffer, sizeof(buffer), 0) < 0){
+		error("Error reciving the data from the client");
 	}
 	
 
