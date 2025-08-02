@@ -18,7 +18,7 @@ void error(const char* msg){
 
 int main(){
 
-	//0 Für Protocl, das ist einfach deafult
+	//0 Für Protocl, das ist deafult protocol
 	int serverSocket = socket(AF_INET, SOCK_STREAM,0);
 	if(serverSocket == -1){
 		error("Error creating the socket");
@@ -62,15 +62,6 @@ int main(){
 	if(recv(clientSocket, buffer, sizeof(buffer), 0) < 0){
 		error("Error reciving the data from the client");
 	}
-	
-
-	//if(inet_pton(AF_INET, "127.0.0.1", &socketAdress.sin_addr) <= 0){
-    //    error("Invalid address/ Address not supported");
-    //}
-	
-	//if(connect(serverSocket,(struct sockaddr*) &socketAdress, sizeof(socketAdress)) == -1){
-	//	error("Error, conneting the socket with the server failed");
-	//}
 
 	close(serverSocket);
 	
