@@ -11,6 +11,7 @@
 #define PORT 9090
 #define LISTEN_BACKLOG 50
 #define BUFFER_SIZE 1024
+#define MESSAGE_SIZE 1024
 
 void error(const char* msg){
 	perror(msg);
@@ -39,7 +40,7 @@ int main(){
 	if(listen(serverSocket,LISTEN_BACKLOG) == -1){
 		error("Error listening for a connection");
 	}
-	
+
 	struct sockaddr_in clientAddr;
 	socklen_t clientLen = sizeof(clientAddr);
 
@@ -48,12 +49,6 @@ int main(){
 
 	if(clientSocket == -1){
 		error("Error accpeting the connection");
-	}
-
-	const char* message = "Heyy";
-
-	if(send(clientSocket, message, strlen(message), 0) == -1){
-		error("Error sending the data to the client");
 	}
 
 	char buffer[BUFFER_SIZE] = {0};
@@ -69,6 +64,16 @@ int main(){
 	else{
 		buffer[bytesReceived] = '\0';
 		printf("Received from client: %s\n", buffer);
+	}
+
+
+	char message[MESSAGE_SIZE];
+    printf("Write a message to the cleint: ");
+    fgets(message, MESSAGE_SIZE, stdin);
+	message[strcspn(message, "\n")] = '\0';
+
+	if(send(clientSocket, message, strlen(message), 0) == -1){
+		error("Error sending the data to the client");
 	}
 
 	close(clientSocket);

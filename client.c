@@ -11,6 +11,7 @@
 #define PORT 9090
 #define LISTEN_BACKLOG 50
 #define BUFFER_SIZE 1024
+#define MESSAGE_SIZE 1024
 
 void error(const char* msg){
 	perror(msg);
@@ -35,6 +36,16 @@ int main(){
 		error("Error conneting to server");
 	}
 
+	char message[MESSAGE_SIZE];
+
+    printf("Write a message to the server: ");
+    fgets(message, MESSAGE_SIZE, stdin);
+    message[strcspn(message, "\n")] = '\0';
+
+	if(send(clientSocket, message, strlen(message), 0) == -1){
+		error("Error sending the data to the server");
+	}
+
     char buffer[BUFFER_SIZE] = {0};
 
     //reciving data from the server 
@@ -48,14 +59,9 @@ int main(){
         printf("Message from server: %s\n", buffer);
     }
 
-	const char* message = "Heyy from client !!! :9";
-
-	if(send(clientSocket, message, strlen(message), 0) == -1){
-		error("Error sending the data to the server");
-	}
-
 	close(clientSocket);
 	
 
 	return 0;
 }
+
