@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <stdbool.h> 
+#include <ctype.h>
 
 #define PORT 9090
 #define LISTEN_BACKLOG 50
@@ -51,34 +53,43 @@ int main(){
 		error("Error accpeting the connection");
 	}
 
-	char buffer[BUFFER_SIZE] = {0};
+	while (true){
 
-	ssize_t bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
+		char buffer[BUFFER_SIZE] = {0};
 
-	if(bytesReceived< 0){
-		error("Error reciving the data from the client");
+		ssize_t bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
+
+		if(bytesReceived< 0){
+			error("Error reciving the data from the client");
+		}
+		else if(bytesReceived == 0){
+			error("Client Disconneted");
+		}
+		else{
+			buffer[bytesReceived] = '\0';
+			printf("Received from client: %s\n", buffer);
+		}
+
+		char message[MESSAGE_SIZE];
+		printf("Write a message to the cleint: ");
+		fgets(message, MESSAGE_SIZE, stdin);
+		message[strcspn(message, "\n")] = '\0';
+
+		if(send(clientSocket, message, strlen(message), 0) == -1){
+			error("Error sending the data to the client");
+		}
+
+		char input[3];
+		printf("Do you wanna send another message? Y or N: ");
+		fgets(input, sizeof(input), stdin);
+		if (tolower(input[0]) == 'n') {
+			close(clientSocket);
+			break;
+		}
+		else{
+			continue;
+		}
 	}
-	else if(bytesReceived == 0){
-		error("Client Disconneted");
-	}
-	else{
-		buffer[bytesReceived] = '\0';
-		printf("Received from client: %s\n", buffer);
-	}
-
-
-	char message[MESSAGE_SIZE];
-    printf("Write a message to the cleint: ");
-    fgets(message, MESSAGE_SIZE, stdin);
-	message[strcspn(message, "\n")] = '\0';
-
-	if(send(clientSocket, message, strlen(message), 0) == -1){
-		error("Error sending the data to the client");
-	}
-
-	close(clientSocket);
-	close(serverSocket);
-	
 
 	return 0;
 }
