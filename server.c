@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 #include <netinet/in.h>
 #include <string.h>
 
@@ -38,9 +39,7 @@ int main(){
 	if(listen(serverSocket,LISTEN_BACKLOG) == -1){
 		error("Error listening for a connection");
 	}
-
-	//ACCEPT ...
-
+	
 	struct sockaddr_in clientAddr;
 	socklen_t clientLen = sizeof(clientAddr);
 
@@ -54,15 +53,25 @@ int main(){
 	const char* message = "Heyy";
 
 	if(send(clientSocket, message, strlen(message), 0) == -1){
-		error("Error sending the data");
+		error("Error sending the data to the client");
 	}
 
 	char buffer[BUFFER_SIZE] = {0};
 
-	if(recv(clientSocket, buffer, sizeof(buffer), 0) < 0){
+	ssize_t bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
+
+	if(bytesReceived< 0){
 		error("Error reciving the data from the client");
 	}
+	else if(bytesReceived == 0){
+		error("Client Disconneted");
+	}
+	else{
+		buffer[bytesReceived] = '\0';
+		printf("Received from client: %s\n", buffer);
+	}
 
+	close(clientSocket);
 	close(serverSocket);
 	
 

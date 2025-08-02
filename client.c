@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <unistd.h>
 #include <string.h>
 
 #define PORT 9090
@@ -28,19 +29,30 @@ int main(){
 	memset(&clientSocketAdress, 0, sizeof(clientSocketAdress));
 	clientSocketAdress.sin_family = AF_INET;
 	clientSocketAdress.sin_port = htons(PORT);
-	clientSocketAdress.sin_addr.s_addr = INADDR_ANY;
+	clientSocketAdress.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     if(connect(clientSocket,(struct sockaddr*) &clientSocketAdress, sizeof(clientSocketAdress)) == -1){
-		error("Error, conneting the socket with the server failed");
+		error("Error conneting to server");
 	}
-	
 
-	const char* message = "Heyy";
+    char buffer[BUFFER_SIZE] = {0};
+
+    //reciving data from the server 
+    ssize_t bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
+
+    if(bytesReceived < 0){
+        error("Error reciving data from server");
+    }
+    else{
+        buffer[bytesReceived] = '\0';
+        printf("Message from server: %s\n", buffer);
+    }
+
+	const char* message = "Heyy from client !!! :9";
 
 	if(send(clientSocket, message, strlen(message), 0) == -1){
-		error("Error sending the data");
+		error("Error sending the data to the server");
 	}
-
 
 	close(clientSocket);
 	
